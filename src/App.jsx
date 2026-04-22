@@ -1,7 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
+import BrowsePoolsPage from './pages/BrowsePoolsPage';
+import CreatePoolPage from './pages/CreatePoolPage';
+import PoolDetailPage from './pages/PoolDetailPage';
+
 import PrivateRoute from './components/PrivateRoute';
 
 function App() {
@@ -12,18 +15,34 @@ function App() {
           path="/"
           element={
             <PrivateRoute>
-              <HomePage />
+              <BrowsePoolsPage />
             </PrivateRoute>
           }
         />
         <Route path="/auth" element={<AuthPage />} />
-	<Route
-           path="/profile"
-           element={ 
+        <Route
+          path="/profile"
+          element={
             <PrivateRoute>
-             <ProfilePage />
+              <ProfilePage />
             </PrivateRoute>
-           }
+          }
+        />
+        <Route
+          path="/create-pool"
+          element={
+            <PrivateRoute>
+              <CreatePoolPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/pools/:id"
+          element={
+            <PrivateRoute>
+              <PoolDetailPage />
+            </PrivateRoute>
+          }
         />
       </Routes>
     </Router>
