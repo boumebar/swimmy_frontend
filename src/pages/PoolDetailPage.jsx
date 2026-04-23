@@ -237,7 +237,10 @@ export default function PoolDetailPage() {
             {/* Renter Actions */}
             {!isOwner && (
               <div className="mt-8 pt-8 border-t">
-                <button className="w-full bg-green-600 text-white px-6 py-3 rounded font-bold hover:bg-green-700 text-lg">
+                <button
+                  onClick={() => navigate(`/booking/${pool.id}`)}
+                  className="w-full bg-green-600 text-white px-6 py-3 rounded font-bold hover:bg-green-700 text-lg"
+                >
                   Book This Pool
                 </button>
               </div>

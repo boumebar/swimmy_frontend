@@ -4,6 +4,8 @@ import ProfilePage from './pages/ProfilePage';
 import BrowsePoolsPage from './pages/BrowsePoolsPage';
 import CreatePoolPage from './pages/CreatePoolPage';
 import PoolDetailPage from './pages/PoolDetailPage';
+import MyBookingsPage from './pages/MyBookingsPage';
+import BookingPage from './pages/BookingPage';
 
 import PrivateRoute from './components/PrivateRoute';
 
@@ -41,6 +43,22 @@ function App() {
           element={
             <PrivateRoute>
               <PoolDetailPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/my-bookings"
+          element={
+            <PrivateRoute>
+              <MyBookingsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/booking/:id"
+          element={
+            <PrivateRoute>
+              <BookingPage />
             </PrivateRoute>
           }
         />
