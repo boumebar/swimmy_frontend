@@ -1,12 +1,19 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import useAuth from '../utils/useAuth';
 import api from '../utils/api';
 import { uploadToCloudinary } from '../utils/cloudinary';
 
-export default function CreatePoolPage() {
+export default function EditPoolPage() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [pool, setPool] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -19,9 +26,74 @@ export default function CreatePoolPage() {
     pricePerWeek: null,
     photos: [],
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
+  useEffect(() => {
+    const fetchPool = async () => {
+      try {
+        const res = await api.get(`/pools/${id}`);
+        setPool(res.data);
+        setFormData({
+          title: res.data.title,
+          description: res.data.description,
+          address: res.data.address,
+          latitude: res.data.latitude,
+          longitude: res.data.longitude,
+          capacity: res.data.capacity,
+          pricePerHour: res.data.pricePerHour,
+          pricePerDay: res.data.pricePerDay,
+          pricePerWeek: res.data.pricePerWeek,
+          photos: res.data.photos || [],
+        });
+      } catch (err) {
+        console.error('Error fetching pool:', err);
+        setError('Pool not found');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPool();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        Loading pool...
+      </div>
+    );
+  }
+
+  if (!pool) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-500 mb-4">Pool not found</p>
+          <button
+            onClick={() => navigate('/')}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Back to Pools
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (pool.ownerId !== user?.id) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-500 mb-4">You can only edit your own pools</p>
+          <button
+            onClick={() => navigate('/')}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Back to Pools
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,16 +132,16 @@ export default function CreatePoolPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
     setError('');
 
     try {
-      const res = await api.post('/pools', formData);
-      navigate(`/pools/${res.data.id}`);
+      await api.patch(`/pools/${id}`, formData);
+      navigate(`/pools/${id}`);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create pool');
+      setError(err.response?.data?.error || 'Failed to update pool');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -106,7 +178,14 @@ export default function CreatePoolPage() {
       </nav>
 
       <div className="max-w-2xl mx-auto p-6">
-        <h2 className="text-3xl font-bold mb-6">Create Pool</h2>
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-6 text-blue-600 hover:text-blue-700 font-bold"
+        >
+          ← Back
+        </button>
+
+        <h2 className="text-3xl font-bold mb-6">Edit Pool</h2>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -123,7 +202,6 @@ export default function CreatePoolPage() {
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="e.g., Olympic Pool in Algiers"
               className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -135,7 +213,6 @@ export default function CreatePoolPage() {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Describe your pool..."
               rows="4"
               className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -150,7 +227,6 @@ export default function CreatePoolPage() {
               name="address"
               value={formData.address}
               onChange={handleChange}
-              placeholder="e.g., Downtown Algiers"
               className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -165,7 +241,6 @@ export default function CreatePoolPage() {
                 value={formData.latitude}
                 onChange={handleChange}
                 step="0.0001"
-                placeholder="36.7372"
                 className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -177,7 +252,6 @@ export default function CreatePoolPage() {
                 value={formData.longitude}
                 onChange={handleChange}
                 step="0.0001"
-                placeholder="3.0869"
                 className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -192,7 +266,6 @@ export default function CreatePoolPage() {
               value={formData.capacity}
               onChange={handleChange}
               min="1"
-              placeholder="50"
               className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -208,8 +281,6 @@ export default function CreatePoolPage() {
                 value={formData.pricePerHour}
                 onChange={handleChange}
                 min="0"
-                step="10"
-                placeholder="500"
                 className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -221,8 +292,6 @@ export default function CreatePoolPage() {
                 value={formData.pricePerDay}
                 onChange={handleChange}
                 min="0"
-                step="10"
-                placeholder="5000"
                 className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -235,8 +304,6 @@ export default function CreatePoolPage() {
                 value={formData.pricePerWeek || ''}
                 onChange={handleChange}
                 min="0"
-                step="10"
-                placeholder="30000"
                 className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -287,10 +354,10 @@ export default function CreatePoolPage() {
           {/* Submit */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={submitting}
             className="w-full bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? 'Creating...' : 'Create Pool'}
+            {submitting ? 'Saving...' : 'Save Changes'}
           </button>
         </form>
       </div>

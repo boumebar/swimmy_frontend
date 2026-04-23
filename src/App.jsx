@@ -3,6 +3,7 @@ import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import BrowsePoolsPage from './pages/BrowsePoolsPage';
 import CreatePoolPage from './pages/CreatePoolPage';
+import EditPoolPage from './pages/EditPoolPage';
 import PoolDetailPage from './pages/PoolDetailPage';
 import MyBookingsPage from './pages/MyBookingsPage';
 import BookingPage from './pages/BookingPage';
@@ -35,6 +36,14 @@ function App() {
           element={
             <PrivateRoute>
               <CreatePoolPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/edit-pool/:id"
+          element={
+            <PrivateRoute>
+              <EditPoolPage />
             </PrivateRoute>
           }
         />

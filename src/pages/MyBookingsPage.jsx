@@ -51,7 +51,13 @@ export default function MyBookingsPage() {
 
   const handleStatusChange = async (bookingId, newStatus) => {
   try {
-    await api.patch(`/bookings/${bookingId}`, { status: newStatus });
+    if (newStatus === 'cancelled') {
+      // Renter cancelling: use DELETE
+      await api.delete(`/bookings/${bookingId}`);
+    } else {
+      // Owner accepting/declining: use PATCH
+      await api.patch(`/bookings/${bookingId}`, { status: newStatus });
+    }
     // Refresh bookings
     const res = await api.get('/bookings');
     setBookings(res.data);

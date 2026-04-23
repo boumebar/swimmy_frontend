@@ -85,7 +85,12 @@ export default function BrowsePoolsPage() {
               type="number"
               placeholder="Max Price (DZD)"
               value={priceMax}
-              onChange={(e) => setPriceMax(e.target.value)}
+              onChange={(e) => {
+                const value = Math.max(0, Math.floor(parseInt(e.target.value) || 0) / 10) * 10;
+                setPriceMax(value);
+              }}
+              step="10"
+              min="0"
               className="p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
