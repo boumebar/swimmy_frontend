@@ -10,6 +10,8 @@ import BookingPage from './pages/BookingPage';
 import InboxPage from './pages/InboxPage';
 
 import PrivateRoute from './components/PrivateRoute';
+import OwnerDashboard from './pages/OwnerDashboard';
+import RenterDashboard from './pages/RenterDashboard';
 
 function App() {
   return (
@@ -77,6 +79,22 @@ function App() {
           element={
             <PrivateRoute>
               <InboxPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/owner-dashboard"
+          element={
+            <PrivateRoute>
+              <OwnerDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/renter-dashboard"
+          element={
+            <PrivateRoute>
+              <RenterDashboard />
             </PrivateRoute>
           }
         />
