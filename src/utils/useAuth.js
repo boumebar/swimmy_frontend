@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { initSocket, disconnectSocket } from './socket';
 
 const useAuth = create((set) => ({
   user: null,
@@ -10,6 +11,9 @@ const useAuth = create((set) => ({
     localStorage.setItem('auth_token', token);
     localStorage.setItem('user', JSON.stringify(user));
     set({ user, token, isAuthenticated: true });
+
+    // Initialize socket connection
+    initSocket(user.id);
   },
 
   // Load user from localStorage on app start
@@ -19,6 +23,9 @@ const useAuth = create((set) => ({
     if (token && userStr) {
       const user = JSON.parse(userStr);
       set({ user, token, isAuthenticated: true });
+
+      // Initialize socket connection
+      initSocket(user.id);
     }
   },
 
@@ -27,6 +34,9 @@ const useAuth = create((set) => ({
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
     set({ user: null, token: null, isAuthenticated: false });
+
+    // Disconnect socket
+    disconnectSocket();
   },
 }));
 

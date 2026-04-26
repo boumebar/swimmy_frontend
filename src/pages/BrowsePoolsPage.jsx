@@ -43,17 +43,22 @@ export default function BrowsePoolsPage() {
           <h1 className="text-2xl font-bold">🏊 SWIMMY</h1>
           <div className="flex items-center gap-4">
             <span>Welcome, {user?.name}!</span>
-            
+
             <a href="/create-pool"
               className="bg-green-500 px-4 py-2 rounded hover:bg-green-600 font-bold"
             >
               + Create Pool
             </a>
-            
+
             <a href="/profile"
               className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
             >
               Profile
+            </a>
+            <a href="/inbox"
+              className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Inbox
             </a>
             <button
               onClick={() => {

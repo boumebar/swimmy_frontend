@@ -7,6 +7,7 @@ import EditPoolPage from './pages/EditPoolPage';
 import PoolDetailPage from './pages/PoolDetailPage';
 import MyBookingsPage from './pages/MyBookingsPage';
 import BookingPage from './pages/BookingPage';
+import InboxPage from './pages/InboxPage';
 
 import PrivateRoute from './components/PrivateRoute';
 
@@ -68,6 +69,14 @@ function App() {
           element={
             <PrivateRoute>
               <BookingPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/inbox"
+          element={
+            <PrivateRoute>
+              <InboxPage />
             </PrivateRoute>
           }
         />

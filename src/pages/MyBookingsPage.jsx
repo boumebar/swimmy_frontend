@@ -50,21 +50,21 @@ export default function MyBookingsPage() {
   };
 
   const handleStatusChange = async (bookingId, newStatus) => {
-  try {
-    if (newStatus === 'cancelled') {
-      // Renter cancelling: use DELETE
-      await api.delete(`/bookings/${bookingId}`);
-    } else {
-      // Owner accepting/declining: use PATCH
-      await api.patch(`/bookings/${bookingId}`, { status: newStatus });
+    try {
+      if (newStatus === 'cancelled') {
+        // Renter cancelling: use DELETE
+        await api.delete(`/bookings/${bookingId}`);
+      } else {
+        // Owner accepting/declining: use PATCH
+        await api.patch(`/bookings/${bookingId}`, { status: newStatus });
+      }
+      // Refresh bookings
+      const res = await api.get('/bookings');
+      setBookings(res.data);
+    } catch (err) {
+      console.error('Error updating booking:', err);
     }
-    // Refresh bookings
-    const res = await api.get('/bookings');
-    setBookings(res.data);
-  } catch (err) {
-    console.error('Error updating booking:', err);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -73,17 +73,20 @@ export default function MyBookingsPage() {
           <h1 className="text-2xl font-bold">🏊 SWIMMY</h1>
           <div className="flex items-center gap-4">
             <span>Welcome, {user?.name}!</span>
-            
+
             <a href="/"
               className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
             >
               Browse Pools
             </a>
-            
-            <a  href="/profile"
+
+            <a href="/profile"
               className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
             >
               Profile
+            </a>
+            <a href="/inbox" className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600">
+              Inbox
             </a>
             <button
               onClick={() => {
@@ -107,11 +110,10 @@ export default function MyBookingsPage() {
             <button
               key={status}
               onClick={() => setFilter(status)}
-              className={`px-4 py-2 rounded font-bold capitalize ${
-                filter === status
+              className={`px-4 py-2 rounded font-bold capitalize ${filter === status
                   ? 'bg-blue-600 text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
-              }`}
+                }`}
             >
               {status}
             </button>
@@ -124,7 +126,7 @@ export default function MyBookingsPage() {
         ) : filteredBookings.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <p className="mb-4">No bookings found</p>
-            
+
             <a href="/"
               className="text-blue-600 hover:text-blue-700 font-bold"
             >
@@ -216,8 +218,8 @@ export default function MyBookingsPage() {
                           className="w-full bg-red-600 text-white px-3 py-2 rounded text-sm font-bold hover:bg-red-700"
                         >
                           Cancel
-              </button>
-            )}
+                        </button>
+                      )}
                   </div>
                 </div>
 
