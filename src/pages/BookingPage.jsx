@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useAuth from '../utils/useAuth';
 import api from '../utils/api';
@@ -29,6 +29,15 @@ export default function BookingPage() {
     totalPrice: 0,
   });
 
+  const errorRef = useRef(null);
+
+  // Auto-scroll to error message
+  useEffect(() => {
+    if (error && errorRef.current) {
+      errorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [error]);
+
   useEffect(() => {
     const fetchPool = async () => {
       try {
@@ -46,6 +55,17 @@ export default function BookingPage() {
   }, [id]);
 
   const handleDateSelect = (startDate, endDate) => {
+    // Check if endDate is before startDate
+    if (endDate < startDate) {
+      setFormData((prev) => ({
+        ...prev,
+        startDate: '',
+        endDate: '',
+      }));
+      setSummary({ nights: 0, totalPrice: 0 });
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       startDate: startDate.toISOString().split('T')[0],
@@ -53,7 +73,8 @@ export default function BookingPage() {
     }));
 
     // Calculate summary
-    const nights = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+    let nights = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+    nights = nights === 0 ? 1 : nights; // Minimum 1 night
     const totalPrice = pool ? pool.pricePerDay * nights : 0;
     setSummary({ nights, totalPrice });
   };
@@ -68,11 +89,20 @@ export default function BookingPage() {
     updateSummary({ ...formData, endDate: value });
   };
 
+
   const updateSummary = (data) => {
     if (data.startDate && data.endDate) {
       const start = new Date(data.startDate);
       const end = new Date(data.endDate);
-      const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+      // Check if endDate is before startDate
+      if (end < start) {
+        setSummary({ nights: 0, totalPrice: 0 });
+        return;
+      }
+
+      let nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+      nights = nights === 0 ? 1 : nights; // Minimum 1 night
       const totalPrice = pool ? pool.pricePerDay * nights : 0;
       setSummary({ nights, totalPrice });
     }
@@ -149,19 +179,19 @@ export default function BookingPage() {
           <h1 className="text-2xl font-bold">🏊 SWIMMY</h1>
           <div className="flex items-center gap-4">
             <span>Welcome, {user?.name}!</span>
-            
+
             <a href="/"
               className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
             >
               Browse Pools
             </a>
-            
+
             <a href="/my-bookings"
               className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
             >
               My Bookings
             </a>
-            
+
             <a href="/profile"
               className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
             >
@@ -191,7 +221,10 @@ export default function BookingPage() {
         <h1 className="text-3xl font-bold mb-6">Book: {pool.title}</h1>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          <div
+            ref={errorRef}
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6"
+          >
             {error}
           </div>
         )}
@@ -225,11 +258,29 @@ export default function BookingPage() {
                   setFormData((prev) => ({ ...prev, notes: value }))
                 }
               />
-              
+
               <button
-                onClick={() => setShowConfirmation(true)}
-                disabled={!formData.startDate || !formData.endDate}
-                className="w-full mt-6 bg-green-600 text-white p-3 rounded font-bold hover:bg-green-700 disabled:opacity-50"
+                onClick={async () => {
+                  // Validate dates before showing modal
+                  if (!formData.startDate || !formData.endDate) {
+                    setError('Please select both dates');
+                    return;
+                  }
+
+                  const start = new Date(formData.startDate);
+                  const end = new Date(formData.endDate);
+
+                  // Check if endDate is before startDate
+                  if (end < start) {
+                    setError('Check-out date must be after check-in date');
+                    return;
+                  }
+
+                  // If all validations pass, show modal
+                  setError('');
+                  setShowConfirmation(true);
+                }}
+                className="w-full mt-6 bg-green-600 text-white p-3 rounded font-bold hover:bg-green-700"
               >
                 Continue to Confirmation
               </button>
